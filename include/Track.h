@@ -24,6 +24,7 @@ class Corner : public TrackSegment {
 public:
     Corner(double radius, double angle);
     double getLength() const override;
+    double getAngle() const;
 private:
     double radius;
     double angle; // in degrees

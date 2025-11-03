@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <cmath> // For std::abs
 
 Straight::Straight(double length) : length(length) {}
 
@@ -13,7 +14,11 @@ Corner::Corner(double radius, double angle) : radius(radius), angle(angle) {}
 
 double Corner::getLength() const {
     // Arc length formula: 2 * PI * r * (angle / 360)
-    return 2 * 3.1415926535 * radius * (angle / 360.0);
+    return 2 * 3.1415926535 * radius * (std::abs(angle) / 360.0);
+}
+
+double Corner::getAngle() const {
+    return angle;
 }
 
 bool Track::loadFromFile(const std::string& filePath) {
