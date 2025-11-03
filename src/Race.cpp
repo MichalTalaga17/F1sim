@@ -15,15 +15,19 @@ Race::Race(Track& track, std::vector<Car*>& cars) : raceTrack(track), raceCars(c
 
 void Race::run() {
     std::cout << "Race started! Total track length: " << totalTrackLength << "m" << std::endl;
-    const double deltaTime = 0.001; // 100ms simulation step
+    std::cout << "Weather conditions: " << weather.toString() << " (Grip: " << weather.getGripModifier() << ")" << std::endl << std::endl;
+
+    const double deltaTime = 0.001;
     size_t finishedCars = 0;
 
     while (finishedCars < raceCars.size()) {
         totalTime += deltaTime;
         
         for (auto* car : raceCars) {
+            // Only update cars that haven't finished
             if (!car->hasFinished(totalTrackLength)) {
-                car->update(deltaTime);
+                car->update(deltaTime, weather.getGripModifier());
+                // Check if the car finished in this step
                 if (car->hasFinished(totalTrackLength)) {
                     results.emplace_back(car->getName(), totalTime);
                 }
@@ -40,12 +44,12 @@ void Race::run() {
         finishedCars = count;
     }
 
-    std::cout << "Race finished!" << std::endl;
+    std::cout << "\nRace finished!" << std::endl;
     printResults();
 }
 
 void Race::printResults() {
-    std::cout << "--- Race Results ---" << std::endl;
+    std::cout << "\n--- Race Results ---" << std::endl;
     // Sort results by time
     std::sort(results.begin(), results.end(), [](const auto& a, const auto& b) {
         return a.second < b.second;
@@ -53,7 +57,7 @@ void Race::printResults() {
 
     int pos = 1;
     for (const auto& result : results) {
-        std::cout << pos++ << ". " << result.first << "	Time: " << result.second << "s" << std::endl;
+        std::cout << pos++ << ". " << result.first << "\tTime: " << result.second << "s" << std::endl;
     }
     std::cout << "--------------------" << std::endl;
 }

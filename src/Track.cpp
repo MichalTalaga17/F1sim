@@ -21,6 +21,10 @@ double Corner::getAngle() const {
     return angle;
 }
 
+double Corner::getRadius() const {
+    return radius;
+}
+
 bool Track::loadFromFile(const std::string& filePath) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -48,4 +52,19 @@ bool Track::loadFromFile(const std::string& filePath) {
 
 const std::vector<std::unique_ptr<TrackSegment>>& Track::getSegments() const {
     return segments;
+}
+
+const TrackSegment* Track::getSegmentAt(double distance, double& distanceIntoSegment) const {
+    double currentDistance = 0.0;
+    for (const auto& segment : segments) {
+        double segmentLength = segment->getLength();
+        if (distance < currentDistance + segmentLength) {
+            distanceIntoSegment = distance - currentDistance;
+            return segment.get();
+        }
+        currentDistance += segmentLength;
+    }
+    // If distance is beyond the track length (e.g., finish line), return the last segment
+    distanceIntoSegment = distance - (currentDistance - segments.back()->getLength());
+    return segments.back().get();
 }

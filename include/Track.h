@@ -25,6 +25,7 @@ public:
     Corner(double radius, double angle);
     double getLength() const override;
     double getAngle() const;
+    double getRadius() const;
 private:
     double radius;
     double angle; // in degrees
@@ -35,6 +36,7 @@ public:
     Track() = default;
     bool loadFromFile(const std::string& filePath);
     const std::vector<std::unique_ptr<TrackSegment>>& getSegments() const;
+    const TrackSegment* getSegmentAt(double distance, double& distanceIntoSegment) const;
 private:
     std::vector<std::unique_ptr<TrackSegment>> segments;
 };
