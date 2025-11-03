@@ -1,0 +1,8 @@
+# CLion specific files
+.idea/
+
+# CMake build directory
+cmake-build-debug/
+
+# Project specification file
+gemini.md
