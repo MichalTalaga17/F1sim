@@ -17,7 +17,6 @@ Ten plik śledzi postęp prac nad projektem, zrealizowane funkcjonalności oraz 
   - [x] Rozszerzenie symulacji na wiele bolidów (pełna stawka).
 - [x] **Fizyka i Parametry**
   - [x] Wprowadzenie dynamicznego modelu fizyki (przyspieszenie, hamowanie, prędkość w zakrętach).
-  - [x] Wprowadzenie modelu paliwa (początkowy zapas, konsumpcja, zatrzymanie po wyczerpaniu).
   - [x] Wprowadzenie modelu pogody (`Weather`) i jej wpływu na przyczepność.
 - [x] **Model Danych (Data-Driven Design)**
   - [x] Stworzenie struktury `Team` do przechowywania parametrów bolidu.
@@ -27,15 +26,15 @@ Ten plik śledzi postęp prac nad projektem, zrealizowane funkcjonalności oraz 
 
 ## Planowane Funkcjonalności (Do Wdrożenia)
 
-- [ ] **Zaawansowany Model Opon**
-  - [ ] Różne mieszanki opon (Soft, Medium, Hard) z unikalnymi parametrami przyczepności i zużycia.
-  - [ ] Model zużycia opon w trakcie jazdy, wpływający na przyczepność.
+- [x] **Zaawansowany Model Opon**
+  - [x] Różne mieszanki opon (Soft, Medium, Hard) z unikalnymi parametrami przyczepności i zużycia.
+  - [x] Model zużycia opon w trakcie jazdy, wpływający na przyczepność.
   - [ ] Model temperatury opon i jej wpływ na przyczepność.
 
-- [ ] **Strategia Wyścigowa**
-  - [ ] Rozszerzenie symulacji na wiele okrążeń.
-  - [ ] Implementacja Pit Stopów (zmiana opon, tankowanie paliwa).
-  - [ ] Podstawy AI strategicznego (decyzje o zjeździe do boksu).
+- [x] **Strategia Wyścigowa**
+  - [ ] Rozszerzenie symulacji na wiele okrążeń. (Częściowo zrobione, ale nie w pełni)
+  - [x] Implementacja Pit Stopów (zmiana opon).
+  - [x] Podstawy AI strategicznego (decyzje o zjeździe do boksu).
 
 - [ ] **Zaawansowana Fizyka i Model Toru**
   - [ ] Wprowadzenie modelu toru w 2D/3D (pozycja X, Y dla każdego bolidu).
@@ -43,7 +42,7 @@ Ten plik śledzi postęp prac nad projektem, zrealizowane funkcjonalności oraz 
   - [ ] Wykorzystanie statystyk `Racecraft (RAC)` i `Awareness (AWA)`.
   - [ ] Modelowanie zdarzeń losowych (wypadki, samochód bezpieczeństwa).
 
-- [ ] **Ulepszenia i Refaktoryzacja**
-  - [ ] Dostrajanie parametrów fizyki dla większego realizmu.
+- [x] **Ulepszenia i Refaktoryzacja**
+  - [ ] Dostrajanie parametrów fizyki dla większego realizmu. (Częściowo zrobione)
   - [ ] Wczytywanie konfiguracji zespołów/kierowców z zewnętrznych plików (np. CSV, JSON).
-  - [ ] Poprawa wizualizacji wyników i przebiegu wyścigu w konsoli.
+  - [x] Poprawa wizualizacji wyników i przebiegu wyścigu w konsoli.
