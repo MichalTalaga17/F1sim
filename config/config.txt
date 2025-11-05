@@ -1,0 +1,90 @@
+[Race]
+Laps=50
+OvertakeProximity=50.0
+EventProbability=0.05
+
+[Track]
+FilePath=config/oval_track.txt
+
+[Weather]
+InitialCondition=Sunny
+GripModifier=1.0
+
+[TireWear]
+SoftWearRate=0.0835
+MediumWearRate=0.0426
+HardWearRate=0.019
+BaseWearMultiplier=0.01
+
+[PitStop]
+MinDuration=19.0
+MaxDuration=24.0
+
+[Strategies]
+AggressivePitThreshold=0.6
+BalancedPitThreshold=0.7
+ConservativePitThreshold=0.8
+PitStopLastLapBuffer=2
+
+[Events]
+MinDuration=5.0
+MaxDuration=15.0
+
+[Drivers]
+# Name,EXP,RAC,AWA,PAC
+Verstappen,87,94,78,96
+Piastri,75,95,84,94
+Norris,82,92,80,94
+Leclerc,82,91,90,93
+Russell,82,93,90,92
+Hamilton,98,92,94,88
+Alonso,99,88,86,88
+Albon,83,88,80,84
+Hulkenberg,88,88,90,82
+Gasly,83,86,82,84
+Sainz,87,87,81,83
+Ocon,82,83,85,82
+Hadjar,68,81,80,82
+Bortoleto,66,78,79,80
+Bearman,69,80,70,77
+Antonelli,67,79,73,78
+Stroll,83,78,76,75
+Tsunoda,78,75,73,77
+Lawson,70,80,71,75
+Colapinto,58,67,66,69
+
+[Teams]
+# Name,TopSpeed,AccelerationRate,BrakingRate,BaseTireGrip
+Ferrari,95.0,10.5,25.0,1.95
+McLaren,94.8,10.4,25.2,1.92
+Mercedes,94.5,10.6,24.8,1.93
+Aston Martin,94.0,10.3,24.5,1.88
+Red Bull,95.5,10.8,25.5,2.00
+RB,93.5,10.2,24.0,1.85
+Haas,93.0,10.0,23.8,1.82
+Alpine,93.8,10.4,24.2,1.87
+Williams,93.2,10.1,24.1,1.84
+Kick Sauber,93.6,10.3,24.3,1.86
+
+[DriverToTeam]
+# DriverName,TeamName
+Leclerc,Ferrari
+Hamilton,Ferrari
+Norris,McLaren
+Piastri,McLaren
+Russell,Mercedes
+Antonelli,Mercedes
+Alonso,Aston Martin
+Stroll,Aston Martin
+Verstappen,Red Bull
+Lawson,Red Bull
+Tsunoda,RB
+Hadjar,RB
+Bearman,Haas
+Ocon,Haas
+Gasly,Alpine
+Colapinto,Alpine
+Albon,Williams
+Sainz,Williams
+Hulkenberg,Kick Sauber
+Bortoleto,Kick Sauber
