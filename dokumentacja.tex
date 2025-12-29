@@ -1,0 +1,221 @@
+\documentclass[12pt, a4paper]{article}
+
+% --- Pakiety Podstawowe ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{geometry}
+\geometry{a4paper, total={170mm,257mm}, left=25mm, top=25mm, bottom=25mm}
+
+% --- Grafika i Kolory ---
+\usepackage[demo]{graphicx} % Usuń [demo] gdy wrzucisz swoje screeny
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{subcaption} % SKILL: Podrysunki (a, b)
+
+% --- Matematyka i Algorytmy ---
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage[ruled,vlined]{algorithm2e} % SKILL: Algorytmy
+
+% --- Kod i Formatowanie ---
+\usepackage{listings}
+\usepackage{fancyhdr} % SKILL: Własne nagłówki/stopki
+\usepackage{hyperref}
+\usepackage{titlesec} % SKILL: Formatowanie tytułów sekcji
+
+% --- Konfiguracja Wyglądu ---
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textit{Symulator Strategii F1}}
+\lhead{Projekt Zaliczeniowy C++}
+\cfoot{\thepage}
+
+% Kolory dla kodu
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codeblue}{rgb}{0.0,0.0,0.8}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.96}
+
+\lstdefinestyle{cppstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{red},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    tabsize=4,
+    frame=single
+}
+\lstset{style=cppstyle}
+
+% --- Strona Tytułowa ---
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    \Huge
+    \textbf{Agentowy Symulator Strategii Wyścigowych}
+    
+    \vspace{0.5cm}
+    \LARGE
+    Analiza wydajności i fizyki w Formule 1
+    
+    \vspace{1.5cm}
+    
+    \textbf{Autor:}\
+    Jan Kowalski \
+    \textit{Nr albumu: 123456}
+    
+    \vfill
+    
+    \Large
+    Prowadzący: dr inż. Imię Nazwisko\
+    Politechnika Wrocławska\
+    Wydział Informatyki i Telekomunikacji
+    
+    \vspace{0.8cm}
+    
+    \Large
+    \today
+    
+\end{titlepage}
+
+% --- Spis Treści ---
+\tableofcontents
+\newpage
+
+% --- Treść Główna ---
+
+\section{Streszczenie}
+Niniejszy dokument opisuje proces projektowania i implementacji symulatora wyścigów samochodowych inspirowanego serią Formuła 1. Aplikacja została napisana w języku C++ (standard C++17) z wykorzystaniem paradygmatu obiektowego. Kluczowym aspektem projektu jest implementacja fizyki opartej na dyskretnych krokach czasowych (\(\Delta t\)) oraz system dynamicznej interpolacji wyników końcowych. Symulator pozwala na analizę wpływu parametrów bolidu (aerodynamika, opony) na ostateczny rezultat wyścigu.
+
+\section{Wstęp Teoretyczny}
+Celem projektu nie była wizualizacja graficzna, lecz wierne odwzorowanie zależności matematycznych panujących na torze.
+
+\subsection{Model Fizyczny Ruchu}
+Ruch bolidu na torze jest determinowany przez bilans sił działających na pojazd. W symulatorze uwzględniono dwa główne ograniczenia.
+
+\subsubsection{Prędkość w zakręcie}
+Maksymalna prędkość $v_{max}$, z jaką bolid może pokonać łuk, wynika z równowagi siły odśrodkowej i siły tarcia bocznego:
+\begin{equation} \label{eq:corner}
+    \frac{mv^2}{R} \le \mu \cdot m \cdot g \implies v_{max} = \sqrt{R \cdot g \cdot \mu_{eff}}
+\end{equation}
+gdzie $\mu_{eff}$ to efektywny współczynnik przyczepności, zależny od mieszanki opon oraz umiejętności kierowcy (\textit{Racecraft}).
+
+\subsubsection{Opór Aerodynamiczny na prostej}
+Na prostych odcinkach toru kluczowe jest przyspieszenie, ograniczone przez opór powietrza $F_d$, który rośnie z kwadratem prędkości:
+\begin{equation}
+    F_d = \frac{1}{2} \rho v^2 C_d A
+\end{equation}
+W symulacji uproszczono ten model, przyjmując parametr \texttt{TopSpeed} jako asymptotyczną granicę prędkości dla danego zespołu.
+
+\section{Architektura Systemu}
+
+\subsection{Struktura Klas}
+Projekt wykorzystuje architekturę modułową. Główne komponenty przedstawiono w tabeli \ref{tab:components}.
+
+\begin{table}[H]
+    \centering
+    \caption{Opis głównych modułów systemu}
+    \label{tab:components}
+    \begin{tabular}{|c|l|l|} \hline
+        \textbf{Klasa} & \textbf{Odpowiedzialność} & \textbf{Wzorce / Koncepcje} \\ \hline
+        \texttt{Race} & Główna pętla, synchronizacja czasu & Game Loop \\ \hline
+        \texttt{Car} & Fizyka, stan paliwa, opony & Entity Component \\ \hline
+        \texttt{Track} & Przechowywanie segmentów toru & Vector Container \\ \hline
+        \texttt{ConfigParser} & Deserializacja plików .txt & Parser \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Zarządzanie Danymi (Data-Driven Design)}
+Wszystkie parametry (statystyki kierowców, układy torów) są wczytywane z zewnętrznych plików konfiguracyjnych. Pozwala to na modyfikację balansu gry bez rekompilacji kodu.
+
+\begin{lstlisting}[caption={Fragment pliku config.txt}, label={lst:config}]
+[Drivers]
+# Name, EXP, RAC, AWA, PAC
+Verstappen, 89, 96, 85, 96
+Norris, 85, 95, 90, 97
+
+[Teams]
+# Name, TopSpeed, Acceleration, Braking, Grip
+McLaren, 96.0, 10.9, 25.5, 2.02
+\end{lstlisting}
+
+\section{Implementacja Algorytmów}
+
+\subsection{Pętla Symulacyjna i Interpolacja}
+Symulator działa ze stałym krokiem czasowym $dt = 0.5s$. Aby uzyskać precyzyjne wyniki na mecie (rzędu $0.001s$), zastosowano interpolację liniową "overshootu" (nadmiarowego dystansu).
+
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwResult{Precyzyjny czas ukończenia wyścigu}
+ $dt \leftarrow 0.5$\
+ $TotalTime \leftarrow 0.0$\
+ \While{Car.NotFinished()}{
+  Car.UpdatePosition($dt$)\
+  $TotalTime \leftarrow TotalTime + dt$\
+  \If{Car.Distance > RaceDistance}{
+   $Overshoot \leftarrow Car.Distance - RaceDistance$\
+   $Correction \leftarrow Overshoot / Car.Speed$\
+   $FinalTime \leftarrow TotalTime - Correction$\
+   \KwRet $FinalTime$\
+  }
+ }
+ \caption{Algorytm precyzyjnego finiszu}
+\end{algorithm}
+
+\section{Wyniki i Weryfikacja}
+Przeprowadzono serię testów na torze Monaco (kręty) oraz Silverstone (szybki).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{screen_menu.png}
+        \caption{Menu wyboru toru}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{screen_wyniki.png}
+        \caption{Tabela wyników końcowych}
+    \end{subfigure}
+    \caption{Interfejs użytkownika aplikacji}
+    \label{fig:screens}
+\end{figure}
+
+Wnioski z symulacji:
+\begin{enumerate}
+    \item Na torze Monaco decydujące znaczenie ma parametr \texttt{Acceleration} oraz \texttt{Grip}.
+    \item Na torze Silverstone wygrywają bolidy z wysokim \texttt{TopSpeed} (np. McLaren).
+    \item Algorytm interpolacji skutecznie wyeliminował problem "skokowych" czasów (wielokrotności 0.5s).
+\end{enumerate}
+
+\section{Podsumowanie i Rozwój}
+Projekt spełnił założenia. Stworzono stabilny silnik wyścigowy.
+\textbf{Możliwe kierunki rozwoju:}
+\begin{itemize}
+    \item Implementacja systemu kolizji.
+    \item Dodanie losowych awarii mechanicznych.
+    \item Wizualizacja 2D przy użyciu biblioteki SFML.
+\end{itemize}
+
+\begin{thebibliography}{9}
+\bibitem{cppref} 
+B. Stroustrup, \textit{The C++ Programming Language}, 4th Edition, Addison-Wesley, 2013.
+\bibitem{f1metrics} 
+F1 Metrics, \textit{Mathematical model of lap time}, 2019.
+\bibitem{gameloop} 
+R. Nystrom, \textit{Game Programming Patterns}, Genever Benning, 2014.
+\end{thebibliography}
+
+\end{document}
