@@ -4,37 +4,37 @@ Ten plik śledzi postęp prac nad projektem, zrealizowane funkcjonalności oraz 
 
 ## Zrealizowane Funkcjonalności (MVP i Rozszerzenia)
 
-- [x] **Podstawy Projektu**
-  - [x] Inicjalizacja projektu w C++ z użyciem CMake.
-  - [x] Stworzenie podstawowej pętli symulacji.
-- [x] **Struktura Danych**
-  - [x] Wprowadzenie podstawowych klas (`Car`, `Track`, `Race`).
-  - [x] Refaktoryzacja struktury plików (`src`, `include`).
-  - [x] Wprowadzenie polimorficznych segmentów toru (`Straight`, `Corner`).
-  - [x] Obsługa lewych/prawych zakrętów (ujemny/dodatni kąt).
-- [x] **Model Symulacji (1D)**
-  - [x] Symulacja wyścigu dla jednego bolidu.
-  - [x] Rozszerzenie symulacji na wiele bolidów (pełna stawka).
-- [x] **Fizyka i Parametry**
-  - [x] Wprowadzenie dynamicznego modelu fizyki (przyspieszenie, hamowanie, prędkość w zakrętach).
-  - [x] Wprowadzenie modelu pogody (`Weather`) i jej wpływu na przyczepność.
-- [x] **Model Danych (Data-Driven Design)**
-  - [x] Stworzenie struktury `Team` do przechowywania parametrów bolidu.
-  - [x] Stworzenie struktury `Driver` do przechowywania umiejętności kierowcy.
-  - [x] Pełna integracja parametrów Zespołu i Kierowcy z modelem fizyki.
-  - [x] Zasilenie symulacji danymi z oficjalnych ratingów EA F1.
+- [] **Podstawy Projektu**
+  - [] Inicjalizacja projektu w C++ z użyciem CMake.
+  - [] Stworzenie podstawowej pętli symulacji.
+- [] **Struktura Danych**
+  - [] Wprowadzenie podstawowych klas (`Car`, `Track`, `Race`).
+  - [] Refaktoryzacja struktury plików (`src`, `include`).
+  - [] Wprowadzenie polimorficznych segmentów toru (`Straight`, `Corner`).
+  - [] Obsługa lewych/prawych zakrętów (ujemny/dodatni kąt).
+- [] **Model Symulacji (1D)**
+  - [] Symulacja wyścigu dla jednego bolidu.
+  - [] Rozszerzenie symulacji na wiele bolidów (pełna stawka).
+- [] **Fizyka i Parametry**
+  - [] Wprowadzenie dynamicznego modelu fizyki (przyspieszenie, hamowanie, prędkość w zakrętach).
+  - [] Wprowadzenie modelu pogody (`Weather`) i jej wpływu na przyczepność.
+- [] **Model Danych (Data-Driven Design)**
+  - [] Stworzenie struktury `Team` do przechowywania parametrów bolidu.
+  - [] Stworzenie struktury `Driver` do przechowywania umiejętności kierowcy.
+  - [] Pełna integracja parametrów Zespołu i Kierowcy z modelem fizyki.
+  - [] Zasilenie symulacji danymi z oficjalnych ratingów EA F1.
 
 ## Planowane Funkcjonalności (Do Wdrożenia)
 
-- [x] **Zaawansowany Model Opon**
-  - [x] Różne mieszanki opon (Soft, Medium, Hard) z unikalnymi parametrami przyczepności i zużycia.
-  - [x] Model zużycia opon w trakcie jazdy, wpływający na przyczepność.
+- [] **Zaawansowany Model Opon**
+  - [] Różne mieszanki opon (Soft, Medium, Hard) z unikalnymi parametrami przyczepności i zużycia.
+  - [] Model zużycia opon w trakcie jazdy, wpływający na przyczepność.
   - [ ] Model temperatury opon i jej wpływ na przyczepność.
 
-- [x] **Strategia Wyścigowa**
+- [] **Strategia Wyścigowa**
   - [ ] Rozszerzenie symulacji na wiele okrążeń. (Częściowo zrobione, ale nie w pełni)
-  - [x] Implementacja Pit Stopów (zmiana opon).
-  - [x] Podstawy AI strategicznego (decyzje o zjeździe do boksu).
+  - [] Implementacja Pit Stopów (zmiana opon).
+  - [] Podstawy AI strategicznego (decyzje o zjeździe do boksu).
 
 - [ ] **Zaawansowana Fizyka i Model Toru**
   - [ ] Wprowadzenie modelu toru w 2D/3D (pozycja X, Y dla każdego bolidu).
@@ -42,7 +42,7 @@ Ten plik śledzi postęp prac nad projektem, zrealizowane funkcjonalności oraz 
   - [ ] Wykorzystanie statystyk `Racecraft (RAC)` i `Awareness (AWA)`.
   - [ ] Modelowanie zdarzeń losowych (wypadki, samochód bezpieczeństwa).
 
-- [x] **Ulepszenia i Refaktoryzacja**
+- [] **Ulepszenia i Refaktoryzacja**
   - [ ] Dostrajanie parametrów fizyki dla większego realizmu. (Częściowo zrobione)
   - [ ] Wczytywanie konfiguracji zespołów/kierowców z zewnętrznych plików (np. CSV, JSON).
-  - [x] Poprawa wizualizacji wyników i przebiegu wyścigu w konsoli.
+  - [] Poprawa wizualizacji wyników i przebiegu wyścigu w konsoli.

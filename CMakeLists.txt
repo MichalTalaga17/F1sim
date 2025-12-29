@@ -9,16 +9,9 @@ include_directories(include)
 # List all source files explicitly
 set(SOURCES
     src/main.cpp
+    src/ConfigParser.cpp
     src/Car.cpp
     src/Race.cpp
-    src/Track.cpp
-    src/Weather.cpp
-    src/Team.cpp
-    src/Driver.cpp
-    src/Agent.cpp
-    src/Strategy.cpp
-    src/Tire.cpp
-    src/ConfigParser.cpp
 )
 
 # Add the executable with all the sources
