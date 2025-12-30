@@ -9,6 +9,12 @@ enum class WeatherType {
     Storm
 };
 
+enum class TireCompound {
+    Soft,
+    Medium,
+    Hard
+};
+
 struct Team {
     std::string name;
     double topSpeed;

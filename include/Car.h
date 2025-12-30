@@ -8,7 +8,7 @@ class Car {
 public:
     Car(const Driver& driver, const Team& team, int startGridPosition);
 
-    void update(double dt, const Track& track, WeatherType weather, std::mt19937& rng, const Car* carAhead = nullptr);
+    void update(double dt, const Track& track, WeatherType weather, std::mt19937& rng, int totalLaps, const Car* carAhead = nullptr);
 
     double getTotalDistance() const { return totalDistance; }
     double getLapDistance() const { return lapDistance; }
@@ -20,6 +20,7 @@ public:
 
     bool isPitting() const { return pitStopTimer > 0; }
     std::string getStatus() const;
+    std::string getTireName() const;
 
     void completeRace(double time) { 
         finished = true; 
@@ -30,6 +31,13 @@ public:
 private:
     Driver driver;
     Team team;
+
+    // Tire management
+    TireCompound currentTire;
+    TireCompound nextTire;
+    double getTireGripMod() const;
+    double getTireWearMod() const;
+    void chooseNextTire(int totalLaps);
 
     double totalDistance = 0.0;
     double lapDistance = 0.0;

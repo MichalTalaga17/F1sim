@@ -6,9 +6,11 @@
 Car::Car(const Driver& d, const Team& t, int startGridPosition) : driver(d), team(t) {
     totalDistance = -static_cast<double>(startGridPosition) * 8.0;
     lapDistance = totalDistance;
+    currentTire = TireCompound::Soft; // Start on Softs
+    nextTire = TireCompound::Medium; 
 }
 
-void Car::update(double dt, const Track& track, WeatherType weather, std::mt19937& rng, const Car* carAhead) {
+void Car::update(double dt, const Track& track, WeatherType weather, std::mt19937& rng, int totalLaps, const Car* carAhead) {
     if (finished) return;
 
     if (pitStopTimer > 0) {
@@ -16,6 +18,7 @@ void Car::update(double dt, const Track& track, WeatherType weather, std::mt1993
         if (pitStopTimer <= 0) {
             tireHealth = 1.0;
             pitStopTimer = 0;
+            currentTire = nextTire; // Switch tires
         }
         return;
     }
@@ -108,14 +111,19 @@ void Car::update(double dt, const Track& track, WeatherType weather, std::mt1993
 
     double wearFactor = (currentSeg->type == "CORNER") ? 2.0 : 0.5;
     double driverFactor = 1.0 + ((100 - driver.awareness) / 200.0); 
-    tireHealth -= (0.0003 * wearFactor * driverFactor * dt); 
+    
+    // Tire wear calculation with specific tire modifier
+    tireHealth -= (0.0003 * wearFactor * driverFactor * getTireWearMod() * dt); 
     if (tireHealth < 0.2) tireHealth = 0.2; 
 
     if (lapDistance >= track.totalLength) {
         lapDistance -= track.totalLength;
         currentLap++;
         
+        // Pit logic
         if (tireHealth < 0.40 && !finished) {
+            chooseNextTire(totalLaps); // AI decision
+            
             std::normal_distribution<> pitDist(22.0 * team.pitStopMultiplier, 1.5);
             double pitTime = pitDist(rng);
             if (pitTime < 15.0) pitTime = 15.0;
@@ -134,7 +142,8 @@ double Car::calculateTargetSpeed(const TrackSegment& segment, double gripModifie
         
         double driverSkill = 0.8 + (driver.racecraft / 500.0);
         double tireState = 0.5 + (tireHealth * 0.5);
-        double effectiveGrip = team.baseTireGrip * gripModifier * driverSkill * tireState;
+        // Include tire specific grip
+        double effectiveGrip = team.baseTireGrip * gripModifier * driverSkill * tireState * getTireGripMod();
 
         double vMax = std::sqrt(radius * 9.81 * effectiveGrip);
         if (vMax > 85.0) vMax = 85.0;
@@ -143,15 +152,67 @@ double Car::calculateTargetSpeed(const TrackSegment& segment, double gripModifie
 }
 
 double Car::getEffectiveAcceleration(double gripModifier) {
-    return team.acceleration * tireHealth * gripModifier;
+    return team.acceleration * tireHealth * gripModifier * getTireGripMod();
 }
 
 double Car::getEffectiveBraking(double gripModifier) {
-    return team.braking * tireHealth * gripModifier;
+    return team.braking * tireHealth * gripModifier * getTireGripMod();
 }
 
 std::string Car::getStatus() const {
-    if (finished) return "FINISHED";
-    if (pitStopTimer > 0) return "IN PIT";
-    return "Lap " + std::to_string(currentLap);
+    std::string s;
+    if (finished) s = "FINISHED";
+    else if (pitStopTimer > 0) s = "IN PIT";
+    else s = "Lap " + std::to_string(currentLap);
+    
+    s += " [" + getTireName() + "]";
+    return s;
+}
+
+std::string Car::getTireName() const {
+    switch(currentTire) {
+        case TireCompound::Soft: return "S";
+        case TireCompound::Medium: return "M";
+        case TireCompound::Hard: return "H";
+    }
+    return "?";
+}
+
+double Car::getTireGripMod() const {
+    switch(currentTire) {
+        case TireCompound::Soft: return 1.15;
+        case TireCompound::Medium: return 1.0;
+        case TireCompound::Hard: return 0.9;
+    }
+    return 1.0;
+}
+
+double Car::getTireWearMod() const {
+    switch(currentTire) {
+        case TireCompound::Soft: return 1.5;
+        case TireCompound::Medium: return 1.0;
+        case TireCompound::Hard: return 0.6;
+    }
+    return 1.0;
+}
+
+void Car::chooseNextTire(int totalLaps) {
+    int lapsRemaining = totalLaps - currentLap;
+    if (lapsRemaining <= 0) {
+        nextTire = TireCompound::Soft; // Doesn't matter much
+        return;
+    }
+    
+    // Simple AI Logic
+    // Softs last roughly 10-15 laps (depending on wear)
+    // Mediums last 20-25
+    // Hards last 30+
+    
+    if (lapsRemaining < 15) {
+        nextTire = TireCompound::Soft;
+    } else if (lapsRemaining < 28) {
+        nextTire = TireCompound::Medium;
+    } else {
+        nextTire = TireCompound::Hard;
+    }
 }
