@@ -12,7 +12,6 @@ public:
         double eventProbability;
         double pitStopMinDuration;
         double pitStopMaxDuration;
-        // ... inne parametry globalne
     };
 
     ConfigParser();
@@ -27,7 +26,6 @@ private:
     std::map<std::string, Team> teamsMap;
     std::vector<Driver> driversList;
     GlobalConfig globalConfig;
-    
-    // Helper do parsowania linii CSV
+
     std::vector<std::string> split(const std::string& s, char delimiter);
 };

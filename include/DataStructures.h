@@ -28,10 +28,10 @@ struct Driver {
 };
 
 struct TrackSegment {
-    std::string type; // STRAIGHT or CORNER
+    std::string type;
     double length;
-    double angle;  // For corners
-    double radius; // For corners
+    double angle;
+    double radius;
 };
 
 struct Track {

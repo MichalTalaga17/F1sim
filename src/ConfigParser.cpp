@@ -40,12 +40,10 @@ bool ConfigParser::loadMainConfig(const std::string& filepath) {
 
         auto tokens = split(line, ',');
         
-        // Parsowanie sekcji
         if (currentSection == "Race") {
              if (line.find("Laps=") != std::string::npos) globalConfig.laps = std::stoi(line.substr(5));
         }
         else if (currentSection == "Teams") {
-            // Name,TopSpeed,AccelerationRate,BrakingRate,BaseTireGrip,PitStopMultiplier
             if (tokens.size() >= 6) {
                 Team t;
                 t.name = tokens[0];
@@ -58,7 +56,6 @@ bool ConfigParser::loadMainConfig(const std::string& filepath) {
             }
         }
         else if (currentSection == "Drivers") {
-            // Name,EXP,RAC,AWA,PAC
             if (tokens.size() >= 5) {
                 Driver d;
                 d.name = tokens[0];
@@ -70,7 +67,6 @@ bool ConfigParser::loadMainConfig(const std::string& filepath) {
             }
         }
         else if (currentSection == "DriverToTeam") {
-            // DriverName,TeamName
             if (tokens.size() >= 2) {
                 std::string dName = tokens[0];
                 std::string tName = tokens[1];
@@ -89,7 +85,6 @@ bool ConfigParser::loadMainConfig(const std::string& filepath) {
 Track ConfigParser::loadTrack(const std::string& filepath) {
     Track track;
     track.filePath = filepath;
-    // Wyciągnij nazwę z pliku (np. monaco_track.txt -> Monaco)
     std::filesystem::path p(filepath);
     track.name = p.stem().string(); 
     track.totalLength = 0;
@@ -116,7 +111,6 @@ Track ConfigParser::loadTrack(const std::string& filepath) {
             seg.radius = 0;
         } else if (type == "CORNER") {
             ss >> seg.angle >> seg.radius;
-            // Szacunkowa długość łuku: (kąt/360) * 2 * pi * r
             seg.length = (std::abs(seg.angle) / 360.0) * 2 * 3.14159 * seg.radius;
         }
         

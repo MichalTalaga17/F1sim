@@ -1,48 +1,42 @@
 # Roadmap Symulatora Wyścigów F1
 
-Ten plik śledzi postęp prac nad projektem, zrealizowane funkcjonalności oraz plany na przyszłość.
+Stan na: 30 Grudnia 2025
 
-## Zrealizowane Funkcjonalności (MVP i Rozszerzenia)
+## Zrealizowane (Done)
 
-- [] **Podstawy Projektu**
-  - [] Inicjalizacja projektu w C++ z użyciem CMake.
-  - [] Stworzenie podstawowej pętli symulacji.
-- [] **Struktura Danych**
-  - [] Wprowadzenie podstawowych klas (`Car`, `Track`, `Race`).
-  - [] Refaktoryzacja struktury plików (`src`, `include`).
-  - [] Wprowadzenie polimorficznych segmentów toru (`Straight`, `Corner`).
-  - [] Obsługa lewych/prawych zakrętów (ujemny/dodatni kąt).
-- [] **Model Symulacji (1D)**
-  - [] Symulacja wyścigu dla jednego bolidu.
-  - [] Rozszerzenie symulacji na wiele bolidów (pełna stawka).
-- [] **Fizyka i Parametry**
-  - [] Wprowadzenie dynamicznego modelu fizyki (przyspieszenie, hamowanie, prędkość w zakrętach).
-  - [] Wprowadzenie modelu pogody (`Weather`) i jej wpływu na przyczepność.
-- [] **Model Danych (Data-Driven Design)**
-  - [] Stworzenie struktury `Team` do przechowywania parametrów bolidu.
-  - [] Stworzenie struktury `Driver` do przechowywania umiejętności kierowcy.
-  - [] Pełna integracja parametrów Zespołu i Kierowcy z modelem fizyki.
-  - [] Zasilenie symulacji danymi z oficjalnych ratingów EA F1.
+### 1. Podstawy i Architektura
+- [x] Inicjalizacja projektu CMake i struktura katalogów (src/include).
+- [x] System wczytywania konfiguracji z plików `.txt` (Tory, Kierowcy, Zespoły).
+- [x] Klasy bazowe: `Car`, `Track` (Segmenty), `Race`, `ConfigParser`.
+- [x] Ograniczenie komentarzy w kodzie do niezbędnego minimum (PL).
 
-## Planowane Funkcjonalności (Do Wdrożenia)
+### 2. Fizyka i Model Jazdy
+- [x] Model ruchu oparty na segmentach (Proste/Zakręty).
+- [x] Fizyka przyczepności (wpływ opon, pogody, umiejętności kierowcy).
+- [x] Zużycie opon (Tire Wear) wpływające na osiągi.
+- [x] Symulacja Kwalifikacji (generowanie Gridu na podstawie osiągów).
+- [x] Podstawowe wyprzedzanie (Traffic Logic) i błędy kierowców.
 
-- [] **Zaawansowany Model Opon**
-  - [] Różne mieszanki opon (Soft, Medium, Hard) z unikalnymi parametrami przyczepności i zużycia.
-  - [] Model zużycia opon w trakcie jazdy, wpływający na przyczepność.
-  - [ ] Model temperatury opon i jej wpływ na przyczepność.
+### 3. Interfejs i Logika Wyścigu
+- [x] Pętla wyścigu z wizualizacją postępu w konsoli (ASCII bars).
+- [x] Tabela wyników na żywo (Live Leaderboard).
+- [x] Obsługa Pit Stopów (prosta logika czasowa).
+- [x] Wybór pogody przed wyścigiem.
 
-- [] **Strategia Wyścigowa**
-  - [ ] Rozszerzenie symulacji na wiele okrążeń. (Częściowo zrobione, ale nie w pełni)
-  - [] Implementacja Pit Stopów (zmiana opon).
-  - [] Podstawy AI strategicznego (decyzje o zjeździe do boksu).
+## Do Zrobienia (To-Do)
 
-- [ ] **Zaawansowana Fizyka i Model Toru**
-  - [ ] Wprowadzenie modelu toru w 2D/3D (pozycja X, Y dla każdego bolidu).
-  - [ ] Implementacja logiki wyprzedzania i obrony pozycji.
-  - [ ] Wykorzystanie statystyk `Racecraft (RAC)` i `Awareness (AWA)`.
-  - [ ] Modelowanie zdarzeń losowych (wypadki, samochód bezpieczeństwa).
+### 1. Inteligencja (AI) i Strategia – PRIORYTET
+- [ ] **Strategia "What-If"**: Zastąpienie prostego `if (tire < 40%)` algorytmem symulującym przyszłość. Agent powinien przeliczyć, czy opłaca się zjechać teraz, czy później.
+- [ ] **Wybór Mieszanki Opon**: Dodanie typów opon (Soft/Medium/Hard) i decyzji AI, którą mieszankę założyć.
 
-- [] **Ulepszenia i Refaktoryzacja**
-  - [ ] Dostrajanie parametrów fizyki dla większego realizmu. (Częściowo zrobione)
-  - [ ] Wczytywanie konfiguracji zespołów/kierowców z zewnętrznych plików (np. CSV, JSON).
-  - [] Poprawa wizualizacji wyników i przebiegu wyścigu w konsoli.
+### 2. Zdarzenia Losowe i Środowisko
+- [ ] **Safety Car (SC) / VSC**: Implementacja globalnego spowolnienia stawki w przypadku "wypadku".
+- [ ] **Dynamiczna Pogoda**: Zmiana pogody *w trakcie* wyścigu (np. zaczyna padać na 15. okrążeniu), wymuszająca zmianę strategii.
+- [ ] **Awarie mechaniczne**: Losowe wycofania z wyścigu (DNF).
+
+### 3. Fizyka - Rozszerzenia
+- [ ] **Model Paliwa**: Wpływ malejącej masy paliwa na czasy okrążeń (wypalanie paliwa = szybszy bolid).
+- [ ] **System DRS**: Bardziej formalne strefy DRS na prostych.
+
+### 4. Dane i Wyniki
+- [ ] **Eksport Wyników**: Zapis końcowej klasyfikacji i czasów wszystkich okrążeń do pliku `.csv`.

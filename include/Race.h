@@ -1,6 +1,7 @@
 #pragma once
 #include "Car.h"
 #include <vector>
+#include <random>
 
 class Race {
 public:
@@ -14,6 +15,7 @@ private:
     int totalLaps;
     double raceTime = 0.0;
     bool raceFinished = false;
+    std::mt19937 rng;
 
     void updateLeaderboard();
     void printStatus();

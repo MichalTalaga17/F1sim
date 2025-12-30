@@ -12,10 +12,7 @@
 
 namespace fs = std::filesystem;
 
-// --- Helper Functions ---
-
 void clearConsole() {
-    // Prosty hack na czyszczenie konsoli
 #ifdef _WIN32
     system("cls");
 #else
@@ -29,87 +26,55 @@ void printHeader(const std::string& title) {
     std::cout << "========================================\n";
 }
 
-// --- Logic ---
-
 struct GridPosition {
     int position;
     Driver driver;
     Team team;
-    double qualifyingTime; // Simulated time
+    double qualifyingTime;
 };
 
-// Funkcja symulująca kwalifikacje
 std::vector<GridPosition> simulateQualifying(const std::vector<Driver>& drivers, const std::vector<Team>& teams, const Track& track) {
     std::vector<GridPosition> grid;
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::normal_distribution<> d(0, 0.2); // Losowy czynnik +/- 0.2s
+    std::normal_distribution<> d(0, 0.2);
 
-    // Mapowanie nazw zespołów na obiekty Team dla szybszego dostępu
     std::map<std::string, Team> teamMap;
     for (const auto& t : teams) teamMap[t.name] = t;
 
-    // --- Obliczanie realistycznego czasu bazowego ---
     double baseLapTime = 0.0;
     
-    // Iterujemy przez segmenty, aby oszacować czas przejazdu idealnego bolidu
     for (const auto& seg : track.segments) {
         double segmentSpeed = 0;
         
         if (seg.type == "STRAIGHT") {
-            // Na prostej średnia jest wysoka, ale zależy od długości (przyspieszanie)
-            // Uproszczenie: długa prosta > 280km/h (77m/s), krótka > 200km/h (55m/s)
-            if (seg.length > 500) segmentSpeed = 75.0; // ~270 km/h avg
-            else segmentSpeed = 55.0; // ~200 km/h avg
+            if (seg.length > 500) segmentSpeed = 75.0;
+            else segmentSpeed = 55.0;
         } else {
-            // W zakręcie prędkość zależy od promienia (fizyka: v^2/r = g*mu)
-            // V_max = sqrt(Radius * 9.81 * Grip)
-            // Używamy abs(), bo minus oznacza kierunek skrętu
             double absRadius = std::abs(seg.radius);
-            
-            // Zabezpieczenie przed zerowym promieniem (błąd w pliku)
             if (absRadius < 1.0) absRadius = 1.0;
 
-            double cornerGrip = 2.5; // Aerodynamika + Opony
+            double cornerGrip = 2.5;
             double vMax = std::sqrt(absRadius * 9.81 * cornerGrip);
             
-            // Ograniczenie górne (nie jedziemy 400km/h w łuku)
             if (vMax > 85.0) vMax = 85.0; 
-            
             segmentSpeed = vMax;
         }
         
-        // Zabezpieczenie przed dzieleniem przez zero (powinno być niemożliwe, ale dmuchamy na zimne)
         if (segmentSpeed < 1.0) segmentSpeed = 1.0;
-
         baseLapTime += (seg.length / segmentSpeed);
     }
     
-    // Dodajemy mały narzut na hamowanie (czas tracony na wejściach w zakręty)
-    // Zakładamy, że wyliczony powyżej czas jest "perfect flow", w realu traci się na dohamowaniach.
     baseLapTime *= 1.10; 
 
     for (const auto& driver : drivers) {
         Team car = teamMap[driver.teamName];
         
-        // --- Algorytm "Performance Score" ---
-        // Normalizacja do okolic 1.0 dla przeciętnego bolidu
-        // TopSpeed ~95 (0.95), Acc ~10.5 (0.7), Grip ~1.9 (0.76)
         double carScore = (car.topSpeed / 100.0) * 0.4 + (car.acceleration / 15.0) * 0.3 + (car.baseTireGrip / 2.5) * 0.3;
-        
-        // Driver skill (~0.8 - 0.95)
         double driverScore = (driver.pace / 100.0) * 0.7 + (driver.racecraft / 100.0) * 0.3;
-
-        // Combined Performance (Wartość w okolicach 0.8 - 1.1)
-        // Im wyższa wartość, tym SZYBCIEJ jedziemy (mniejszy czas)
         double totalPerformance = (carScore * 0.65 + driverScore * 0.35);
-        
-        // Modyfikator czasu: Lepszy performance = mniejszy mnożnik czasu
-        // Np. Performance 1.0 -> Mnożnik 0.85
-        // Performance 0.8 -> Mnożnik 0.95
         double timeMultiplier = 1.45 - (totalPerformance * 0.6); 
 
-        // Symulacja czasu: BaseTime * Multiplier + RandomError
         double simulatedTime = baseLapTime * timeMultiplier + d(gen);
 
         GridPosition pos;
@@ -119,20 +84,16 @@ std::vector<GridPosition> simulateQualifying(const std::vector<Driver>& drivers,
         grid.push_back(pos);
     }
 
-    // Sortowanie od najmniejszego czasu (Pole Position)
     std::sort(grid.begin(), grid.end(), [](const GridPosition& a, const GridPosition& b) {
         return a.qualifyingTime < b.qualifyingTime;
     });
 
-    // Przypisanie pozycji
     for (size_t i = 0; i < grid.size(); ++i) {
         grid[i].position = i + 1;
     }
 
     return grid;
 }
-
-// --- Menus ---
 
 Track selectTrack() {
     std::vector<std::string> trackFiles;
@@ -143,7 +104,6 @@ Track selectTrack() {
         else if (fs::exists("../../config")) configDir = "../../config";
     }
     
-    // Skanowanie katalogu
     for (const auto& entry : fs::directory_iterator(configDir)) {
         if (entry.path().extension() == ".txt" && entry.path().filename() != "config.txt") {
             trackFiles.push_back(entry.path().string());
@@ -159,7 +119,7 @@ Track selectTrack() {
     std::cout << "\nChoice: ";
     std::cin >> choice;
 
-    if (choice < 1 || choice > trackFiles.size()) choice = 1; // Default to first
+    if (choice < 1 || choice > trackFiles.size()) choice = 1;
 
     ConfigParser parser;
     return parser.loadTrack(trackFiles[choice - 1]);
@@ -185,7 +145,6 @@ WeatherType selectWeather() {
     }
 }
 
-// Helper do formatowania czasu
 std::string formatTime(double seconds) {
     int minutes = static_cast<int>(seconds) / 60;
     double remainingSeconds = seconds - (minutes * 60);
@@ -194,13 +153,10 @@ std::string formatTime(double seconds) {
     return ss.str();
 }
 
-// --- Main ---
-
 int main() {
     ConfigParser parser;
     std::string configPath = "config/config.txt";
     
-    // Prosta detekcja ścieżki
     if (!fs::exists(configPath)) {
         if (fs::exists("../config/config.txt")) {
             configPath = "../config/config.txt";
@@ -250,14 +206,12 @@ int main() {
     std::cin.ignore(); 
     std::cin.get();
 
-    // 6. Konwersja Gridu na obiekty Car
     std::vector<Car> raceCars;
-    for (const auto& pos : grid) {
-        Car car(pos.driver, pos.team);
+    for (size_t i = 0; i < grid.size(); ++i) {
+        Car car(grid[i].driver, grid[i].team, i);
         raceCars.push_back(car);
     }
 
-    // Pobranie liczby okrążeń z configu
     int laps = parser.getGlobalConfig().laps;
     if (laps <= 0) laps = 10;
 
