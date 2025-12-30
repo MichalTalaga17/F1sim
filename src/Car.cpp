@@ -8,13 +8,14 @@ Car::Car(const Driver& d, const Team& t, int startGridPosition) : driver(d), tea
     lapDistance = totalDistance;
 }
 
-void Car::update(double dt, const Track& track, WeatherType weather, std::mt19937& rng, const Car* carAhead) {
+void Car::update(double dt, const Track& track, int totalLaps, WeatherType weather, std::mt19937& rng, const Car* carAhead) {
     if (finished) return;
 
     if (pitStopTimer > 0) {
         pitStopTimer -= dt;
         if (pitStopTimer <= 0) {
             tireHealth = 1.0;
+            lapStartTireHealth = 1.0;
             pitStopTimer = 0;
         }
         return;
@@ -112,15 +113,69 @@ void Car::update(double dt, const Track& track, WeatherType weather, std::mt1993
     if (tireHealth < 0.2) tireHealth = 0.2; 
 
     if (lapDistance >= track.totalLength) {
+        // Track tire wear
+        double currentWear = lapStartTireHealth - tireHealth;
+        if (currentWear > 0) {
+            tireWearPerLap = 0.7 * tireWearPerLap + 0.3 * currentWear;
+        }
+        lapStartTireHealth = tireHealth;
+
         lapDistance -= track.totalLength;
         currentLap++;
         
-        if (tireHealth < 0.40 && !finished) {
-            std::normal_distribution<> pitDist(22.0 * team.pitStopMultiplier, 1.5);
-            double pitTime = pitDist(rng);
-            if (pitTime < 15.0) pitTime = 15.0;
+        if (!finished) {
+            // Strategia "What-If"
+            int lapsRemaining = totalLaps - (currentLap - 1);
             
-            pitStopTimer = pitTime;
+            // Only consider pitting if we have reasonable wear or strategic need
+            if (lapsRemaining > 0) {
+                std::normal_distribution<> pitDist(22.0 * team.pitStopMultiplier, 1.5);
+                double estimatedPitTime = pitDist(rng); 
+                if (estimatedPitTime < 15.0) estimatedPitTime = 15.0;
+
+                // Simple base lap time estimate (avg speed ~60m/s)
+                double baseLapTime = track.totalLength / 60.0; 
+
+                // Simulation Lambda
+                auto simulateTime = [&](double startHealth, bool pitNow) -> double {
+                    double totalTime = 0.0;
+                    double simHealth = startHealth;
+                    
+                    if (pitNow) {
+                        totalTime += estimatedPitTime;
+                        simHealth = 1.0;
+                    }
+
+                    for (int i = 0; i < lapsRemaining; ++i) {
+                        // Forced pit logic in simulation
+                        if (simHealth < 0.25) { // Critical threshold
+                            totalTime += estimatedPitTime;
+                            simHealth = 1.0;
+                        }
+                        
+                        double tireState = 0.5 + (simHealth * 0.5);
+                        // Speed factor approx sqrt(tireState)
+                        // Time factor approx 1/sqrt(tireState)
+                        double speedFactor = std::sqrt(tireState);
+                        double lapTime = baseLapTime / speedFactor;
+                        
+                        totalTime += lapTime;
+                        simHealth -= tireWearPerLap;
+                        if (simHealth < 0.2) simHealth = 0.2;
+                    }
+                    return totalTime;
+                };
+
+                double timeKeepGoing = simulateTime(tireHealth, false);
+                double timePitNow = simulateTime(tireHealth, true);
+
+                // Decision
+                // If pitting now is faster by a margin (e.g. 1.0s), do it.
+                // Also force pit if tire is dangerous (< 20%)
+                if (tireHealth < 0.25 || timePitNow < (timeKeepGoing - 1.0)) {
+                    pitStopTimer = estimatedPitTime;
+                }
+            }
         }
     }
 }

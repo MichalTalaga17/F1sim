@@ -40,7 +40,7 @@ void Race::run() {
                         }
                     }
 
-                    cars[i].update(dt, track, WeatherType::Sunny, rng, carAhead);
+                    cars[i].update(dt, track, totalLaps, WeatherType::Sunny, rng, carAhead);
                 } else if (!cars[i].hasFinished(totalLaps)) {
                     double expectedTotalDist = (double)totalLaps * track.totalLength;
                     double overshoot = cars[i].getTotalDistance() - expectedTotalDist;

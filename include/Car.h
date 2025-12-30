@@ -8,7 +8,7 @@ class Car {
 public:
     Car(const Driver& driver, const Team& team, int startGridPosition);
 
-    void update(double dt, const Track& track, WeatherType weather, std::mt19937& rng, const Car* carAhead = nullptr);
+    void update(double dt, const Track& track, int totalLaps, WeatherType weather, std::mt19937& rng, const Car* carAhead = nullptr);
 
     double getTotalDistance() const { return totalDistance; }
     double getLapDistance() const { return lapDistance; }
@@ -39,6 +39,8 @@ private:
     double finishTime = 0.0;
 
     double tireHealth = 1.0;
+    double lapStartTireHealth = 1.0;
+    double tireWearPerLap = 0.02;
     double fuelLoad = 10.0;
 
     double pitStopTimer = 0.0;

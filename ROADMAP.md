@@ -26,7 +26,7 @@ Stan na: 30 Grudnia 2025
 ## Do Zrobienia (To-Do)
 
 ### 1. Inteligencja (AI) i Strategia – PRIORYTET
-- [ ] **Strategia "What-If"**: Zastąpienie prostego `if (tire < 40%)` algorytmem symulującym przyszłość. Agent powinien przeliczyć, czy opłaca się zjechać teraz, czy później.
+- [x] **Strategia "What-If"**: Zastąpienie prostego `if (tire < 40%)` algorytmem symulującym przyszłość. Agent powinien przeliczyć, czy opłaca się zjechać teraz, czy później.
 - [ ] **Wybór Mieszanki Opon**: Dodanie typów opon (Soft/Medium/Hard) i decyzji AI, którą mieszankę założyć.
 
 ### 2. Zdarzenia Losowe i Środowisko
