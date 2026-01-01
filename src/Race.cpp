@@ -82,6 +82,12 @@ void Race::run() {
     std::cout << "\n\n   >>> RACE FINISHED! <<<\n";
     updateLeaderboard();
     printStatus();
+
+    std::cout << "\n=== STRATEGY SUMMARY ===\n";
+    for (const auto& car : cars) {
+         std::cout << std::left << std::setw(20) << car.getDriver().name 
+                   << ": " << car.getStrategyString() << "\n";
+    }
 }
 
 void Race::updateLeaderboard() {

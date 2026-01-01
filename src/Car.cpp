@@ -6,6 +6,7 @@
 Car::Car(const Driver& d, const Team& t, int startGridPosition) : driver(d), team(t) {
     totalDistance = -static_cast<double>(startGridPosition) * 8.0;
     lapDistance = totalDistance;
+    strategyHistory.push_back(currentCompound);
 }
 
 void Car::update(double dt, const Track& track, int totalLaps, WeatherType weather, std::mt19937& rng, const Car* carAhead) {
@@ -17,6 +18,12 @@ void Car::update(double dt, const Track& track, int totalLaps, WeatherType weath
             tireHealth = 1.0;
             lapStartTireHealth = 1.0;
             pitStopTimer = 0;
+            
+            // Change tires
+            std::vector<std::string> compounds = {"S", "M", "H"};
+            std::uniform_int_distribution<> dist(0, 2);
+            currentCompound = compounds[dist(rng)];
+            strategyHistory.push_back(currentCompound);
         }
         return;
     }
@@ -209,4 +216,15 @@ std::string Car::getStatus() const {
     if (finished) return "FINISHED";
     if (pitStopTimer > 0) return "IN PIT";
     return "Lap " + std::to_string(currentLap);
+}
+
+std::string Car::getStrategyString() const {
+    std::string s = "";
+    for (size_t i = 0; i < strategyHistory.size(); ++i) {
+        s += "[" + strategyHistory[i] + "]";
+        if (i < strategyHistory.size() - 1) {
+            s += " -> ";
+        }
+    }
+    return s;
 }

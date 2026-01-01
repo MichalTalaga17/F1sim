@@ -1,7 +1,7 @@
 #pragma once
 #include "DataStructures.h"
 #include <vector>
-
+#include <string>
 #include <random>
 
 class Car {
@@ -20,6 +20,7 @@ public:
 
     bool isPitting() const { return pitStopTimer > 0; }
     std::string getStatus() const;
+    std::string getStrategyString() const;
 
     void completeRace(double time) { 
         finished = true; 
@@ -42,6 +43,10 @@ private:
     double lapStartTireHealth = 1.0;
     double tireWearPerLap = 0.02;
     double fuelLoad = 10.0;
+
+    // Strategy / Tires
+    std::string currentCompound = "M"; // Start on Medium
+    std::vector<std::string> strategyHistory;
 
     double pitStopTimer = 0.0;
 
