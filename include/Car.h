@@ -1,14 +1,14 @@
 #pragma once
 #include "DataStructures.h"
 #include <vector>
-
+#include <string>
 #include <random>
 
 class Car {
 public:
     Car(const Driver& driver, const Team& team, int startGridPosition);
 
-    void update(double dt, const Track& track, WeatherType weather, std::mt19937& rng, const Car* carAhead = nullptr);
+    void update(double dt, const Track& track, int totalLaps, WeatherType weather, std::mt19937& rng, const Car* carAhead = nullptr);
 
     double getTotalDistance() const { return totalDistance; }
     double getLapDistance() const { return lapDistance; }
@@ -20,6 +20,7 @@ public:
 
     bool isPitting() const { return pitStopTimer > 0; }
     std::string getStatus() const;
+    std::string getStrategyString() const;
 
     void completeRace(double time) { 
         finished = true; 
@@ -39,7 +40,13 @@ private:
     double finishTime = 0.0;
 
     double tireHealth = 1.0;
+    double lapStartTireHealth = 1.0;
+    double tireWearPerLap = 0.02;
     double fuelLoad = 10.0;
+
+    // Strategy / Tires
+    std::string currentCompound = "M"; 
+    std::vector<std::pair<std::string, int>> strategyHistory;
 
     double pitStopTimer = 0.0;
 

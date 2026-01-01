@@ -40,7 +40,7 @@ void Race::run() {
                         }
                     }
 
-                    cars[i].update(dt, track, WeatherType::Sunny, rng, carAhead);
+                    cars[i].update(dt, track, totalLaps, WeatherType::Sunny, rng, carAhead);
                 } else if (!cars[i].hasFinished(totalLaps)) {
                     double expectedTotalDist = (double)totalLaps * track.totalLength;
                     double overshoot = cars[i].getTotalDistance() - expectedTotalDist;
@@ -82,6 +82,12 @@ void Race::run() {
     std::cout << "\n\n   >>> RACE FINISHED! <<<\n";
     updateLeaderboard();
     printStatus();
+
+    std::cout << "\n=== STRATEGY SUMMARY ===\n";
+    for (const auto& car : cars) {
+         std::cout << std::left << std::setw(20) << car.getDriver().name 
+                   << ": " << car.getStrategyString() << "\n";
+    }
 }
 
 void Race::updateLeaderboard() {
