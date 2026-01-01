@@ -2,11 +2,37 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <map>
+
+// Helper to get tire stats
+static void getTireStats(const std::string& compound, double& wear, double& grip) {
+    if (compound == "S") {
+        wear = 0.04;
+        grip = 1.10;
+    } else if (compound == "H") {
+        wear = 0.01;
+        grip = 0.90;
+    } else { // Medium
+        wear = 0.02;
+        grip = 1.00;
+    }
+}
 
 Car::Car(const Driver& d, const Team& t, int startGridPosition) : driver(d), team(t) {
     totalDistance = -static_cast<double>(startGridPosition) * 8.0;
     lapDistance = totalDistance;
-    strategyHistory.push_back(currentCompound);
+    
+    // Randomize Start Compound
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::vector<std::string> compounds = {"S", "M", "H"};
+    std::uniform_int_distribution<> dist(0, 2);
+    currentCompound = compounds[dist(gen)];
+    
+    strategyHistory.push_back({currentCompound, 0});
+    
+    double gripMod = 1.0;
+    getTireStats(currentCompound, tireWearPerLap, gripMod);
 }
 
 void Car::update(double dt, const Track& track, int totalLaps, WeatherType weather, std::mt19937& rng, const Car* carAhead) {
@@ -19,11 +45,28 @@ void Car::update(double dt, const Track& track, int totalLaps, WeatherType weath
             lapStartTireHealth = 1.0;
             pitStopTimer = 0;
             
-            // Change tires
-            std::vector<std::string> compounds = {"S", "M", "H"};
-            std::uniform_int_distribution<> dist(0, 2);
-            currentCompound = compounds[dist(rng)];
-            strategyHistory.push_back(currentCompound);
+            // Choose new tire based on remaining laps (Simple Logic)
+            int lapsRemaining = totalLaps - currentLap;
+            if (lapsRemaining <= 15) {
+                currentCompound = "S";
+            } else if (lapsRemaining <= 25) {
+                currentCompound = "M";
+            } else {
+                currentCompound = "H";
+            }
+            
+            // Random chance to mix it up slightly (to keep some variety)
+            std::uniform_real_distribution<> d(0.0, 1.0);
+            if (d(rng) < 0.2) {
+                 std::vector<std::string> opts = {"S", "M", "H"};
+                 std::uniform_int_distribution<> dist(0, 2);
+                 currentCompound = opts[dist(rng)];
+            }
+
+            strategyHistory.push_back({currentCompound, 0});
+            
+            double gripMod = 1.0;
+            getTireStats(currentCompound, tireWearPerLap, gripMod);
         }
         return;
     }
@@ -116,19 +159,29 @@ void Car::update(double dt, const Track& track, int totalLaps, WeatherType weath
 
     double wearFactor = (currentSeg->type == "CORNER") ? 2.0 : 0.5;
     double driverFactor = 1.0 + ((100 - driver.awareness) / 200.0); 
-    tireHealth -= (0.0003 * wearFactor * driverFactor * dt); 
+    
+    // Use compound specific wear
+    tireHealth -= (0.0003 * wearFactor * driverFactor * dt * (tireWearPerLap / 0.02)); 
     if (tireHealth < 0.2) tireHealth = 0.2; 
 
     if (lapDistance >= track.totalLength) {
         // Track tire wear
         double currentWear = lapStartTireHealth - tireHealth;
         if (currentWear > 0) {
-            tireWearPerLap = 0.7 * tireWearPerLap + 0.3 * currentWear;
+            // Adapt observed wear
+            // tireWearPerLap = 0.7 * tireWearPerLap + 0.3 * currentWear; 
+            // Better to stick to compound property but maybe slight adaptation?
+            // Let's keep it simple for now and trust the compound stats.
         }
         lapStartTireHealth = tireHealth;
 
         lapDistance -= track.totalLength;
         currentLap++;
+        
+        // Increment lap count for current stint
+        if (!strategyHistory.empty()) {
+            strategyHistory.back().second++;
+        }
         
         if (!finished) {
             // Strategia "What-If"
@@ -140,45 +193,65 @@ void Car::update(double dt, const Track& track, int totalLaps, WeatherType weath
                 double estimatedPitTime = pitDist(rng); 
                 if (estimatedPitTime < 15.0) estimatedPitTime = 15.0;
 
-                // Simple base lap time estimate (avg speed ~60m/s)
+                // Base lap time (approximate)
                 double baseLapTime = track.totalLength / 60.0; 
 
+                // Determine what tire we WOULD get if we pit now
+                std::string nextTire = "M";
+                if (lapsRemaining <= 15) nextTire = "S";
+                else if (lapsRemaining > 25) nextTire = "H";
+                
+                double nextWear, nextGrip;
+                getTireStats(nextTire, nextWear, nextGrip);
+                
                 // Simulation Lambda
-                auto simulateTime = [&](double startHealth, bool pitNow) -> double {
+                auto simulateTime = [&](double startHealth, double currentWearRate, double currentGrip, bool pitNow) -> double {
                     double totalTime = 0.0;
                     double simHealth = startHealth;
+                    double simWear = currentWearRate;
+                    double simGrip = currentGrip;
                     
+                    int currentSimLap = 0;
+
                     if (pitNow) {
                         totalTime += estimatedPitTime;
                         simHealth = 1.0;
+                        simWear = nextWear;
+                        simGrip = nextGrip;
                     }
 
                     for (int i = 0; i < lapsRemaining; ++i) {
-                        // Forced pit logic in simulation
-                        if (simHealth < 0.25) { // Critical threshold
+                        // If tire dead, must pit
+                        if (simHealth < 0.25) { 
                             totalTime += estimatedPitTime;
                             simHealth = 1.0;
+                            // Assume we pick same optimal tire again for simplicity or standard M
+                            // For simplicity, reset to decent tire stats
+                            simWear = 0.02; 
+                            simGrip = 1.0;
                         }
                         
                         double tireState = 0.5 + (simHealth * 0.5);
-                        // Speed factor approx sqrt(tireState)
-                        // Time factor approx 1/sqrt(tireState)
-                        double speedFactor = std::sqrt(tireState);
+                        // Speed factor: grip * tireState
+                        double speedFactor = std::sqrt(simGrip * tireState);
                         double lapTime = baseLapTime / speedFactor;
                         
                         totalTime += lapTime;
-                        simHealth -= tireWearPerLap;
+                        simHealth -= simWear; // Simple per-lap wear
                         if (simHealth < 0.2) simHealth = 0.2;
                     }
                     return totalTime;
                 };
+                
+                double currentGripMod = 1.0;
+                double dummyWear;
+                getTireStats(currentCompound, dummyWear, currentGripMod);
 
-                double timeKeepGoing = simulateTime(tireHealth, false);
-                double timePitNow = simulateTime(tireHealth, true);
+                double timeKeepGoing = simulateTime(tireHealth, tireWearPerLap, currentGripMod, false);
+                double timePitNow = simulateTime(tireHealth, tireWearPerLap, currentGripMod, true);
 
                 // Decision
-                // If pitting now is faster by a margin (e.g. 1.0s), do it.
-                // Also force pit if tire is dangerous (< 20%)
+                // Pit if time saved > 1.0s or tire critical
                 if (tireHealth < 0.25 || timePitNow < (timeKeepGoing - 1.0)) {
                     pitStopTimer = estimatedPitTime;
                 }
@@ -195,8 +268,14 @@ double Car::calculateTargetSpeed(const TrackSegment& segment, double gripModifie
         if (radius < 1.0) radius = 1.0;
         
         double driverSkill = 0.8 + (driver.racecraft / 500.0);
+        
+        // Tire Grip Influence
+        double tireGripBase = 1.0;
+        double dummy;
+        getTireStats(currentCompound, dummy, tireGripBase);
+        
         double tireState = 0.5 + (tireHealth * 0.5);
-        double effectiveGrip = team.baseTireGrip * gripModifier * driverSkill * tireState;
+        double effectiveGrip = team.baseTireGrip * gripModifier * driverSkill * tireState * tireGripBase;
 
         double vMax = std::sqrt(radius * 9.81 * effectiveGrip);
         if (vMax > 85.0) vMax = 85.0;
@@ -205,25 +284,31 @@ double Car::calculateTargetSpeed(const TrackSegment& segment, double gripModifie
 }
 
 double Car::getEffectiveAcceleration(double gripModifier) {
-    return team.acceleration * tireHealth * gripModifier;
+    double tireGripBase = 1.0;
+    double dummy;
+    getTireStats(currentCompound, dummy, tireGripBase);
+    return team.acceleration * tireHealth * gripModifier * tireGripBase;
 }
 
 double Car::getEffectiveBraking(double gripModifier) {
-    return team.braking * tireHealth * gripModifier;
+    double tireGripBase = 1.0;
+    double dummy;
+    getTireStats(currentCompound, dummy, tireGripBase);
+    return team.braking * tireHealth * gripModifier * tireGripBase;
 }
 
 std::string Car::getStatus() const {
     if (finished) return "FINISHED";
     if (pitStopTimer > 0) return "IN PIT";
-    return "Lap " + std::to_string(currentLap);
+    return "Lap " + std::to_string(currentLap) + " [" + currentCompound + "]";
 }
 
 std::string Car::getStrategyString() const {
     std::string s = "";
     for (size_t i = 0; i < strategyHistory.size(); ++i) {
-        s += "[" + strategyHistory[i] + "]";
+        s += strategyHistory[i].first + "(" + std::to_string(strategyHistory[i].second) + ")";
         if (i < strategyHistory.size() - 1) {
-            s += " -> ";
+            s += "-";
         }
     }
     return s;

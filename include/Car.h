@@ -45,8 +45,8 @@ private:
     double fuelLoad = 10.0;
 
     // Strategy / Tires
-    std::string currentCompound = "M"; // Start on Medium
-    std::vector<std::string> strategyHistory;
+    std::string currentCompound = "M"; 
+    std::vector<std::pair<std::string, int>> strategyHistory;
 
     double pitStopTimer = 0.0;
 
