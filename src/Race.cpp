@@ -5,12 +5,6 @@
 #include <chrono>
 #include <iomanip>
 
-// Powrót do system("clear") dla pełnego czyszczenia konsoli na żądanie użytkownika
-#ifdef _WIN32
-    #define CLEAR_CMD "cls"
-#else
-    #define CLEAR_CMD "clear"
-#endif
 
 Race::Race(const std::vector<Car>& c, const Track& t, int laps) 
     : cars(c), track(t), totalLaps(laps) {
@@ -82,12 +76,6 @@ void Race::run() {
     std::cout << "\n\n   >>> RACE FINISHED! <<<\n";
     updateLeaderboard();
     printStatus();
-
-    std::cout << "\n=== STRATEGY SUMMARY ===\n";
-    for (const auto& car : cars) {
-         std::cout << std::left << std::setw(20) << car.getDriver().name 
-                   << ": " << car.getStrategyString() << "\n";
-    }
 }
 
 void Race::updateLeaderboard() {
